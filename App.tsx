@@ -8,6 +8,9 @@ const db = openDatabase({
 
 const App = () => {
   const [category, setCategory] = useState("");
+  const [delcategory, setDelCategory] = useState("");
+  const [updateid, updateIdCategory] = useState("");
+  const [updatename, updateNameCategory] = useState("");
   const [categories, setCategories] = useState([]);
 
   const createTables = async () => {
@@ -86,22 +89,50 @@ const App = () => {
     );
   };
   const delCategory = async () => {
-    if (!category) {
+
+    if (!delcategory) {
       alert("Enter Id");
       return false;
     }
     (await db).transaction(txn => {
       txn.executeSql(
-        `INSERT INTO categories(name) VALUES(?)`,
-        [category],
+        `DELETE FROM categories WHERE id = ?`,
+        [delcategory],
         (sqlTxn, res) => {
           // (SQLTransaction, SQLResultSet)
-          console.log(`${category} category deleted successfully`);
-          // getCategories();
-          setCategory("");
+          console.log(`${delcategory} category deleted successfully`);
+          getCategories();
+          setDelCategory("");
         },
         error => {
-          console.log('error on adding category' + error);
+          console.log('error on deleting category' + error);
+        },
+      )
+    });
+  };
+  const updateCategory = async () => {
+    if (!updateid) {
+      alert("Enter Id");
+      return false;
+    }
+    if (!updatename) {
+      alert("Enter Name");
+      return false;
+    }
+    (await db).transaction(txn => {
+      txn.executeSql(
+        `UPDATE categories SET name = ? WHERE id = ?`,
+        [updatename, updateid],
+        (sqlTxn, res) => {
+          // (SQLTransaction, SQLResultSet)
+          console.log(`id ${updateid} category Updated successfully`);
+          getCategories();
+          updateIdCategory("");
+          updateNameCategory("");
+
+        },
+        error => {
+          console.log('error on updating category' + error);
         },
       )
     });
@@ -120,14 +151,27 @@ const App = () => {
         onChangeText={setCategory}
         style={{ marginHorizontal: 8 }}
       />
-      <Button title="Submit" onPress={addCategory} />
+      <Button title="INSERT" onPress={addCategory} />
       <TextInput
         placeholder='Enter Id'
-        value={category}
-        onChangeText={setCategory}
+        value={delcategory}
+        onChangeText={setDelCategory}
         style={{ marginHorizontal: 8 }}
       />
-      <Button title="Submit" onPress={delCategory} />
+      <Button title="DELETE" onPress={delCategory} />
+      <TextInput
+        placeholder='Enter Id'
+        value={updateid}
+        onChangeText={updateIdCategory}
+        style={{ marginHorizontal: 8 }}
+      />
+      <TextInput
+        placeholder='Enter Name'
+        value={updatename}
+        onChangeText={updateNameCategory}
+        style={{ marginHorizontal: 8 }}
+      />
+      <Button title="UPDATE" onPress={updateCategory} />
 
 
       <FlatList
@@ -135,13 +179,8 @@ const App = () => {
         renderItem={renderCategory}
         key={cat => cat.id}
       />
-      {/* <Text>App</Text> */}
     </View>
   );
 };
 
 export default App;
-function alert(arg0: string) {
-  throw new Error('Function not implemented.');
-}
-
