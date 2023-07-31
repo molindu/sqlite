@@ -85,7 +85,27 @@ const App = () => {
       </View>
     );
   };
-
+  const delCategory = async () => {
+    if (!category) {
+      alert("Enter Id");
+      return false;
+    }
+    (await db).transaction(txn => {
+      txn.executeSql(
+        `INSERT INTO categories(name) VALUES(?)`,
+        [category],
+        (sqlTxn, res) => {
+          // (SQLTransaction, SQLResultSet)
+          console.log(`${category} category deleted successfully`);
+          // getCategories();
+          setCategory("");
+        },
+        error => {
+          console.log('error on adding category' + error);
+        },
+      )
+    });
+  };
   useEffect(() => {
     createTables();
     getCategories();
@@ -101,6 +121,15 @@ const App = () => {
         style={{ marginHorizontal: 8 }}
       />
       <Button title="Submit" onPress={addCategory} />
+      <TextInput
+        placeholder='Enter Id'
+        value={category}
+        onChangeText={setCategory}
+        style={{ marginHorizontal: 8 }}
+      />
+      <Button title="Submit" onPress={delCategory} />
+
+
       <FlatList
         data={categories}
         renderItem={renderCategory}
